@@ -9,7 +9,7 @@ Structure and Interpretation of Computer Programs
 스위프트 언어를 기반으로 하는 요약과 해석을 작성하기로 한다.
 
 이 책은 5부로 나눠져있다. 
-1. 프로시저로 요약하는 방식 (Building Abstractions with Procedures)
+1. [프로시저로 요약하는 방식](https://github.com/godrm/SICP-Swift/blob/master/Chapter1.md) (Building Abstractions with Procedures)
 
 2. 데이터를 요약하는 방식 (Building Abstractions with Data)
 
