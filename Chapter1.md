@@ -331,7 +331,251 @@ square(5 + 1) + square(5 * 2)
 
 Lisp은 인자 먼저 계산하는 방식으로 동작한다. 그래서 (5+1)이나 (5*2)처럼 같은 식을 여러 번 반복해서 계산하지 않는다. 그 이유는 더 빠르게 동작하고, 교체 방식으로 동작하지 않는 프로시저가 있을 순서대로 계산하는 방식이 더 복잡하기 때문이다. 하지만 순서대로 계산하는 방식도 가치가 있기 때문에 3장과 4장에서 설명한다. 
 
-### 1.1.6 조건 식과 술어Predicates
+### 1.1.6 조건 표현식
+
+조건에 따라서 계산 표현하는 방법을 정리한다. 예를 들어 음수인지, 0인지, 양수인지 조건에 따라 다르게 계산하고 싶을 때 표현하는 방법이 필요하다.
+
+이처럼 경우의 수가 나눠지는 case analysis 경우에 스위프트에서는 switch-case 문법을 사용한다. 
+
+```swift
+func abs(x: Int) -> Int {
+    switch x {
+        case x where x > 0:
+            return x
+        case x where x < 0:
+            return -x
+        default:
+            return 0
+    }
+}
+```
+
+조건 표현식 중에 switch-case 구문 문법은 다음과 같다.
+
+```swift
+switch control expression {
+case pattern 1:
+    statements
+case pattern 2 where condition:
+    statements
+case pattern 3 where condition,
+     pattern 4 where condition:
+    statements
+default:
+    statements
+}
+```
+
+switch 예약어 다음에는 제어를 위한 표현식 control expression이 있고, 그 아래에는 여러 조건을 case로 표현하는 절cluase이 나온다. 조건 식을 계산하는 방법은 간단하다. 먼저 pattern에 나오는 값을 구하고, control expression과 비교해서 참인지 비교한다. 뒤에 where절이 있는 경우는 condition 조건까지 비교해서 참인 경우에 해당 조건의 statements 표현식을 계산한다. 거짓이면 아래 다음 case 조건으로 내려간다. 마지막까지 조건이 모두 거짓인 경우는 default 구문 아래 statments를 실행한다. 논리식으로 모든 조건을 표현하지 않은 경우는 컴파일러가 에러를 표시한다.
+
+절대값을 계산하는 프로시저를 다른 방식으로 만들어보자.
+
+```swift
+func abs(x: Int) -> Int {
+    if x < 0 {
+        return -x
+    }
+    else {
+        return x
+    }
+}
+```
+
+switch-case 구문과 비슷하지만 조건식을 표현하기 위해 if 구문을 활용할 수 있다. switch-case가 조건이 여러 개인 경우에 사용한다면, if 구문은 조건이 두 개 뿐일 때 사용하기 좋은 문법이다. 물론 아래처럼 if 구문 문법을 보면 switch-case 구문처럼 여러 조건을 비교할 수 있지만, 권장할 만한 표현은 아니다. 
+
+```swift
+if condition 1 {
+    statements //to execute if condition 1 is true
+} else if condition 2 {
+    statements //to execute if condition 2 is true
+} else {
+    statements //to execute if both conditions are false
+}
+```
+
+실행기가 if 구문 계산할 때 condition 1 조건을 먼저 계산한다. 그 답이 참이라면 {} 괄호 내부 statements를 실행하고, 거짓이면 아래 조건을 계산한다. abs()를 계산하기 위해 사용한 기본 비교 표현과 복잡한 논리나 판단을 할 수도 있다. 논리 연산에 사용하는 기본 연산은 다음과 같이 세 가지가 있다. 
+
+- (<e1> **&&** <e2> **&&** ... <en>)
+
+논리식 <e>를 왼쪽에서 오른쪽으로 차례대로 계산한다. 그 중에 거짓으로 판단하는 <e>가 나오면 and 식은 거짓이 되고, 나머지 <e>값은 계산하지 않는다.
+
+- (<e1> **||** <e2> **||** ... <en>)
+
+논리식 <e>를 왼쪽에서 오른쪽으로 계산한다. 그 중에 참이라 판단하는 <e>가 나오면 or 식은 참이 되고, 나머지 <e>값은 계산하지 않는다. 
+
+- (**!** <e1>)
+
+<e>가 참이면 not 식은 거짓을, 거짓이면 참을 뒤집는다.
+
+이 중에서 and 와 or는 다른 프로시저와 다르게 인자가 되는 모든 논리식 값을 구하지 않기 때문에 특별한 형태로 선언해야 한다. 
+
+만약 x가 5보다 크고, 10보다 작은 것을 판단하려면 `(x > 5) and (x < 10)` 처럼 작성한다. 
+
+어떤 수가 다른 수보다 크거나 같은지 판단하는 조건을 프로시저로 선언하면 다음과 같다.
+
+```swift
+func >= (x: Int, y: Int) -> Bool {
+    return (x > y) || (x == y)
+}
+```
+
+다른 논리식으로 고쳐보면 이렇게 선언할 수도 있다. 
+
+```swift
+func >= (x: Int, y: Int) -> Bool {
+    return !(x < y)
+}
+```
+
+###### 연습문제 1.1
+
+스위프트 실행기에서 아래 표현식들을 차례대로 계산하면 어떤 값이 나오는지 확인한다. 
+
+```swift
+  1> 10
+$R0: Int = 10
+  2> (5 + 3 + 4)
+$R1: (Int) = {
+  _value = 12
+}
+  3> (9 - 1)
+$R2: (Int) = {
+  _value = 8
+}
+  4> (6 / 2)
+$R3: (Int) = {
+  _value = 3
+}
+  5> ((2 * 4) + (4 - 6))
+$R4: (Int) = {
+  _value = 6
+}
+
+  6> let a = 3
+a: Int = 3
+  7> let b = a+1
+b: Int = 4
+
+  8> a + b + (a * b)
+$R5: Int = 19
+  9> (a == b)
+$R6: (Bool) = {
+  _value = 0
+}
+
+ 10> if (b > a) && (b < (a*b)) { b } else { a }
+ 11> if (b > a) && (b < (a*b)) { print(b) } else { print(a) }
+4
+
+ 12> switch (a, b) {
+ 13.    case (4, _): print(6)
+ 14.    case (_, 4): print(6+7+a)
+ 15.    default: print(25)
+ 16. }
+16
+```
+
+위에 보이는 것처럼 9번까지는 swift 문법으로도 무난하게 표현 가능하다. 
+10번처럼 if 구문에 statement 자리에 값만 넣으면 아무것도 출력되지 않는다. {} 내부에 값만 있으면 해당 값을 대체할 뿐, 새로운 값으로 계산하지 않는다. 그래서 11번처럼 실행기에서 값을 확인하고 싶으면 print()라는 프로시저에 인자값으로 전달해야 한다. 
+
+12번 switch-case 구문에서도 마찬가지다. 조건식 뒤에 변수나 상수에 해당하는 값만 넣으면 아무런 동작을 하지 않는다. 특정한 조건식에 따른 결과를 출력하려면 print() 프로시저를 호출해야 한다.
+
+스위프트에서는 if 구문 결과를 다른 연산자에 인자로 넘기는 표현은 불가능하다. 이렇게 값을 넘겨야 하는 경우는 if 구문과 비슷한 삼항 연산자 Ternary Conditional Operator를 사용해야 한다. `condition ? expression used if true : expression used if false` 
+
+```swift
+ 17> (2 + if (b > a) { b } else { a })
+ error: repl.swift:17:6: error: expected expression after operator
+(2 + if (b > a) { b } else { a })
+     ^
+
+ 17> (2 + ((b > a) ? b : a))
+$R7: (Int) = {
+  _value = 6
+}
+```
+
+다음과 같이 switch-case 구문도 if 구문과 마찬가지로 다른 연산자에 인자값으로 표현식을 전달할 수는 없다. 지금 a값이 3이고, b값이 4인 상태에서 19번처럼 a가 switch-case 구문을 대체해서 `a * (a + 1)`로 처리하지 않는다. 다음과 같이 컴파일 에러가 난다.
+
+```swift
+ 18> switch (a,b) {
+ 19. case (a,b) where a>b: a
+ 20. case (a,b) where a<b: b
+ 21. default: -1
+ 22. } * (a + 1)
+error: repl.swift:22:2: error: consecutive statements on a line must be separated by ';'
+} * (a + 1)
+ ^
+ ;
+
+error: repl.swift:22:3: error: unary operator cannot be separated from its operand
+} * (a + 1)
+  ^~
+```
+
+이렇게 표현식에 일부를 대체해야 하는 복잡한 조건식이 있다면 프로시저를 선언해야만 한다. 프로시저 내에서 원하는 값을 호출한 자리에 대체하고 싶을 때는 `return` 예약어를 사용한다. 만약 조건에 맞아서 실행된 표현식이 `return a` 라면 a값이 되돌아가서 `select(a, b)` 대신에 대체된다. 
+
+```swift
+18> func select(_ a: Int,_ b: Int) -> Int {
+ 19.     switch (a,b) {
+ 20.     case (a,b) where a>b: return a
+ 21.     case (a,b) where a<b: return b
+ 22.     default: return -1
+ 23.     }
+ 24. }
+ 25.
+ 26. select(a, b) * (a + 1)
+```
+
+###### 연습문제 1.2 지나감
+
+###### 연습문제 1.3
+
+세 개 숫자를 인자로 받아서 그 가운데 큰 숫자 두 개를 제곱한 다음, 그 두 값을 덧셈하여 되돌려주는 프로시저를 선언하라.
+
+```swift
+func exam1_3(a: Int, b: Int, c:Int) -> Int {
+    switch (a,b,c) {
+    case (a,b,c) where a > c && b > c:
+        return a*a + b*b
+    case (a,b,c) where a > b && c > b:
+        return a*a + c*c
+    case (a,b,c) where b > a && c > a:
+        return b*b + c*c
+    default:
+        return 0
+    }
+}
+
+exam1_3(a: 10, b: 5, c: 3)
+exam1_3(a: 10, b: 7, c: 9)
+exam1_3(a: 1, b: 7, c: 9)
+```
+
+###### 연습문제 1.4
+
+스위프트에서는 문제처럼 연산자를 대체하는 표현도 불가능하다. 다음과 같이 `값 (if 구문과 연산자) 값` 형태 표현식은 동작하지 않는다.
+
+```swift
+func a_plus_abs_b(a: Int, b: Int) -> Int {
+    return a (if (b > 0) { + }
+    else { - }) b
+}
+```
+
+다음과 같이 if 구문 아래 값과 연산자를 풀어서 작성하거나 연산자를 다른 방식으로 추상화해야 한다. 다른 방식은 더 복잡한 문법 표현 때문에 여기서 설명하지 않는다.
+
+```swift
+func a_plus_abs_b(a: Int, b: Int) -> Int {
+    if (b > 0) {
+        return a + b
+    }
+    else {
+        return a - b
+    }
+}
+```
+
+###### 연습문제 1.5
 
 
 
