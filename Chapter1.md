@@ -643,6 +643,62 @@ func sqrt(x: Int) -> Int {
 
 이런 프로세스를 반복하다보면 점차 2의 제곱근에 가까운 값을 구할 수 있다. 
 
+이 과정을 프로시저로 표현해보자. 제곱근을 구하려는 수radicand x와 제급근에 가까운 근사값 guess를 가지고 계산을 시작한다. 계산하다가 얼추 맞는 값이라고 판단하면 멈추거나 혹은 더 가까운 값을 찾기 위해서 반복한다. 이런 흐름으로 프로시저를 선언하면 다음과 같다. 
+
+```swift
+func sqrt_iter(_ guess: Double, _ x: Double) -> Double {
+    if good_enough(guess, x) {
+        return guess
+    }
+    else {
+        return sqrt_iter(improve(guess, x), x)
+    }
+}
+```
+
+근사값과 x를 근사값으로 나눈 값 (x / guess) 평균을 계산해서 참 제곱근에 더 가까운 값을 어림잡아 계산할 수 있다. 
+
+```swift
+func improve(_ guess: Double, _ x: Double) -> Double {
+    return average(guess, x / guess)
+}
+
+func average(_ x: Double, _ y: Double) -> Double {
+    return (x + y) / 2
+}
+```
+
+이제 얼마나 더 가까워야 충분히 계산했는지(good-enough) 판단할 지 정해보자. 이렇게 선언하면 동작하지만 더 좋은 방법도 있다. 이 프로시저 활용하면 근사값을 제곱한 값에서 x를 뺀 차이가 미리 정한 기준(여기서 0.001)을 넘지 않을 때까지 반복해서 계산한다. 
+
+```swift
+func square(_ x : Double) -> Double { x * x }
+
+func good_enough(_ guess: Double, _ x: Double) -> Bool {
+    return abs(square(guess) - x) < 0.001
+}
+
+func sqrt(x: Double) -> Double {
+    return sqrt_iter(1, x)
+}
+```
+
+지금까지 정의한 모든 프로시저를 스위프트 실행기에 넣으면 sqrt 프로시저를 내장 프로시저처럼 사용할 수 있다. 
+
+```swift
+ 34> sqrt(x: 9)
+$R1: Double = 3.0000915541313802
+ 35> sqrt(x:  (100 + 37))
+$R2: Double = 11.704699917758145
+ 36> sqrt(x:  sqrt(x: 2) + sqrt(x: 3))
+$R3: Double = 1.7739279023207892
+ 37> square( sqrt(x: 1000) )
+$R4: Double = 1000.0003699243661
+```
+
+지금 설명한 sqrt 프로그램은 다른 프로그래밍 언어로 표현하는 계산 절차에서 사용하는 반복처리를 위한 문법이 하나도 없어서 놀라울 지도 모른다. sqrt_iter()처럼 다른 프로시저를 재귀로 반복하는 것으로도 충분하다. 
+
+##### 연습문제 1.6
+
 
 
 ## <a name="head1.2"></a> 1.2 Procedures and the Processes They Generate
