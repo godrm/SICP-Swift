@@ -685,21 +685,99 @@ func sqrt(x: Double) -> Double {
 지금까지 정의한 모든 프로시저를 스위프트 실행기에 넣으면 sqrt 프로시저를 내장 프로시저처럼 사용할 수 있다. 
 
 ```swift
- 34> sqrt(x: 9)
+ sqrt(x: 9)
 $R1: Double = 3.0000915541313802
- 35> sqrt(x:  (100 + 37))
+ sqrt(x:  (100 + 37))
 $R2: Double = 11.704699917758145
- 36> sqrt(x:  sqrt(x: 2) + sqrt(x: 3))
+ sqrt(x:  sqrt(x: 2) + sqrt(x: 3))
 $R3: Double = 1.7739279023207892
- 37> square( sqrt(x: 1000) )
+ square( sqrt(x: 1000) )
 $R4: Double = 1000.0003699243661
 ```
 
 지금 설명한 sqrt 프로그램은 다른 프로그래밍 언어로 표현하는 계산 절차에서 사용하는 반복처리를 위한 문법이 하나도 없어서 놀라울 지도 모른다. sqrt_iter()처럼 다른 프로시저를 재귀로 반복하는 것으로도 충분하다. 
 
-##### 연습문제 1.6
+###### 연습문제 1.6
 
+스위프트를 공부하던 엘리는 if 구문만 특별하다는 게 어색했다. 그래서 다음과 같은 new_if 프로시저를 선언하고 3항 비교 연산자를 정의했다. 
 
+```swift
+func new_if(predicate: Bool, then_clause: Double, else_clause: Double) -> Double {
+    return (predicate) ? then_clause : else_clause
+}
+```
+이 프로시저가 if 표현처럼 동작한다는 것을 보여주려고 아래처럼 작성했다. 
+
+```swift
+new_if(predicate:(2==3), then_clause:0, else_clause:5)
+$R0: Int = 5
+
+new_if(predicate:(1==1), then_clause:0, else_clause:5)
+$R1: Int = 0
+```
+
+그래서 제곱근 프로그램 내부를 다음과 같이 new_if를 써서 고쳤다. 
+
+```swift
+func sqrt_iter(_ guess: Double, _ x: Double) -> Double {
+    return new_if(predicate: good_enough(guess, x), 
+           then_clause: guess,
+           else_clause: sqrt_iter(improve(guess, x), x))
+}
+```
+
+새롭게 선언한 new_if를 실행하기 전에 인자값을 계산하기 위해서 guess와 sqrt_iter()를 먼저 계산해야 한다. 그러면서 sqrt_iter() 재귀로 반복하면서 또 반복한다. 결국 끝나지 않고 무한 반복되다가 프로그램이 멈춘다. 
+
+###### 연습문제 1.7
+
+앞에서 구현한 good_enough() 구현부분 `abs(square(guess) - x) < 0.001` 계산 방식으로는 아주 작은 수나 큰 수의 제곱근을 구할 때 올바르게 동작하지 않는다. 
+다른 방법으로는 guess 근사값을 구하면서 기존 계산값과 비교하면 새로운 계산값 차이가 아주 작아질 때까지 반복하는 것이다. 이 방식으로 제곱근 프로시저를 개선해보고, 아주 작은 수나 큰 수에 대한 제곱근을 구할 때 개선됐는지 확인한다.
+
+> 0.001보다 작은 수가 나오면 오차가 발생할 수 있다. 
+> 너무 큰 수가 나오면 계산하다가 근사값과 차이가 커서 끝나지 않는다. 
+
+해결방법은 다음과 같이 근사값 차이를 이전 값으로 나눠서 값 자체가 커지거나 작아져도 비율로 계산할 수 있도록 하는게 좋다. 
+
+```swift
+func good_enough2(_ guess: Double, _ x: Double) -> Bool {
+    return (abs(square(guess) - x) / x) < 0.0001
+}
+```
+
+###### 연습문제 1.8
+
+세제곱근 cube root를 구하는 뉴튼 계산법은 x의 세제곱근 근사값을 y라고 할 때, 더 가까운 다음 y값을 계산하는 것이다. 
+
+![세제곱근 방정식]()
+
+> 아직 동작 안함
+
+```swift
+func cube(_ x: Double) -> Double {
+    return x * x * x
+}
+
+func good_enough_cube(_ guess: Double, _ x: Double) -> Bool {
+    return (abs(cube(guess) - x) / x ) < 0.0001
+}
+
+func improve_cube(_ guess: Double, _ x: Double) -> Double {
+    return (x + guess * guess + 2 * guess) / 3
+}
+
+func cuberoot_iter(_ guess: Double, _ x: Double) -> Double {
+    if good_enough_cube(guess, x) {
+        return guess
+    }
+    else {
+        return cuberoot_iter(improve_cube(guess, x), x)
+    }
+}
+
+func cuberoot(x: Double) -> Double {
+    return cuberoot_iter(1, x)
+}
+```
 
 ## <a name="head1.2"></a> 1.2 Procedures and the Processes They Generate
 
