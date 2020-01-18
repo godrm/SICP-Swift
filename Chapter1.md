@@ -748,7 +748,7 @@ func good_enough2(_ guess: Double, _ x: Double) -> Bool {
 
 세제곱근 cube root를 구하는 뉴튼 계산법은 x의 세제곱근 근사값을 y라고 할 때, 더 가까운 다음 y값을 계산하는 것이다. 
 
-![세제곱근 방정식]()
+![세제곱근 방정식](https://github.com/godrm/SICP-Swift/blob/master/images/example1.8.png?raw=true)
 
 > 아직 동작 안함
 
@@ -762,7 +762,7 @@ func good_enough_cube(_ guess: Double, _ x: Double) -> Bool {
 }
 
 func improve_cube(_ guess: Double, _ x: Double) -> Double {
-    return (x + guess * guess + 2 * guess) / 3
+    return (x / (guess * guess) + 2 * guess) / 3
 }
 
 func cuberoot_iter(_ guess: Double, _ x: Double) -> Double {
@@ -778,6 +778,69 @@ func cuberoot(x: Double) -> Double {
     return cuberoot_iter(1, x)
 }
 ```
+
+#### 1.1.8 블랙박스처럼 간추린 프로시저
+
+앞서 설명한 sqrt() 예제가 전체 프로세스에서 다른 프로시저를 호출하는 형태다. sqrt_iter()는 재귀recursive로 동작하는 프로시저라는 것을 눈여겨봐야 한다. 
+
+![그림1.2 sqrt 프로그램을 여러 단계로 조각낸 모습](https://github.com/godrm/SICP-Swift/blob/master/images/1.1.8.png?raw=true)
+
+프로시저 선언 내부에서 자신의 일부를 불러서 사용한다. 프로시저 선언 부분에서 자기를 다시 부르도록 선언하는 게 어색할 수 있다. 프로시저 절차를 계속해서 빙빙 돌아가도록 정의하는 게 말이 안된다고 생각할 수 있다. 
+
+그림1.2를 보면 제곱근 전체를 구하는 큰 문제가, 근사값이 충분한가 판단하는 문제와 더 정확한 근사값을 구하는 문제 등으로 나눠진다. 이렇게 문제를 나눠서 작업하는 (문제를 푸는) 프로시저가 따로 있다. 그리고 여러 프로시저를 하나로 묶어서 sqrt() 프로그램을 구성한다. 
+
+큰 문제를 해결하는 프로시저를 아무 생각 없이 자르기만 하는 것은 쉽다. 더 중요한 것은 프로시저 하나를 조립식 부품module처럼 만들어서 다른 프로시저를 선언할 때도 사용할 수 있도록 잘라내는 것이다. square()를 사용해서 good_enough() 프로시저를 선언할 때 square() 프로시저가 구체적으로 어떻게 계산하는지 몰라도 제곱한 값을 내놓는 것을 알 수 있다. square()를 사용하는 곳에서 square()가 제곱을 어떤 방식으로 계산하는지 세세하게 알아야 하는 것은 아니다. good-enough() 프로시저 입장에서 보면 square() 계산 절차라기 보다는 프로시저를 묶어놓은 이름일 뿐이다. 이 과정을 프로시저로 요약하기 procedural abstraction라고 부른다. 프로시저를 부르는(호출하는) 쪽에서는 어떤 프로시저를 쓰더라도 제곱한 값을 계산해서 얻기만 하면 된다. 
+
+만약 simd 모듈을 사용해서 exp2() 나 log2() 함수를 호출해서 구현해도 square()를 호룰하는 입장에서는 둘 다 인자로 받은 값을 제곱해서 전달해 주는 것은 마찬가지다.
+
+```swift
+import simd
+func square(_ x : Double) -> Double {
+    exp2(double(log2(x)))
+}
+
+func double(_ x: Double) -> Double { return x + x }
+```
+
+이처럼 프로그램을 여러 프로시저로 나누어 작성할 때는, 하위 프로시저가 어떻게 계산하는지 드러나지 않도록 감춰서 작성하는 게 중요하다. 그래야 프로시저를 사용하는 사람들이 필요한 모든 프로시저를 모두 만들어 사용하지 않고, 블랙박스처럼 불러서 사용할 수 있다. 프로시저를 사용하는 사람은 그 프로시저가 무엇을 하는지만 알면 되고, 굳이 어떻게 만들었는지는 몰라도 된다. 
+
+##### 지역 이름 local name
+
+프로시저를 만드는 내부 입장에서는, 그것을 호출해서 사용하는 곳에 영향을 주면 안된다.  스위프트에서는 매개변수 이름이 다르면 프로시저도 다른 프로시저로 인식한다. 그래서 아래 두 square() 프로시저는 `square(x:)` 와 `square(y:)`로 구분한다. 
+
+```swift
+func square(x: Double) -> Double { return x * x }
+
+func square(y: Double) -> Double { return y * y }
+```
+
+그렇지만 매개변수 이름은 프로시저 내부 지역에 갇힌 형태로 구현 내부에서만 사용하는 이름이다. 
+
+##### 매개변수 이름 Parameter name과 로컬 이름 local name
+
+스위프트에서는 다른 언어와 다르게 호출할 때 사용하는 매개변수 이름과 내부에서 사용하는 로컬 이름을 구분할 수 있다. 
+
+아래 코드를 보면 첫 번째 선언한 프로시저는 호출할 때 `square(x:)`로 인식한다. 두 번째 프로시저는 `square(with:)`로 인식하고 `square(with: 5)` 이렇게 호출해야 한다. 5라는 값이 할당되는 로컬 이름은 x다. 그리고 이 두 프로시저는 서로 다른 프로시저로 인식한다. 세 번째처럼 매개변수 이름을 생략할 수도 있는데, `square(x:)` 프로시저로 인식하지만 매개변수 이름을 생략한 것이다. 그래서 호출할 때도 `square(5)` 형태로 호출한다. 이렇게 세 가지 형식은 모두 다른 프로시저로 인식한다. 
+
+```swift
+func square(x: Double) -> Double { return x * x }
+
+func square(with x: Double) -> Double { return x * x }
+
+func square(_ x: Double) -> Double { return x * x }
+```
+
+앞서 설명했던 코드에서 `good_enough()` 프로시저를 매개변수 이름을 생략하고 다음과 같이 선언했었다.
+
+```swift
+func good_enough(_ guess: Double, _ x: Double) -> Bool {
+    return abs(square(guess) - x) < 0.0001
+}
+```
+
+여기서도 내부 이름으로 x를 사용하는 데 square()에서 사용하는 x와는 전혀 다른 것이다. 각자 지역에서만 사용하는 이름일 뿐이다. 만약 다른 프로시저 바깥에서 내부에 인자 이름을 사용하게 된다면 good_enough()에서 x인지 square()에서 x인지 뒤죽박죽 섞이게 될 것이다. square()는 블랙박스여야 한다. 
+
+
 
 ## <a name="head1.2"></a> 1.2 Procedures and the Processes They Generate
 
