@@ -840,9 +840,63 @@ func good_enough(_ guess: Double, _ x: Double) -> Bool {
 
 여기서도 내부 이름으로 x를 사용하는 데 square()에서 사용하는 x와는 전혀 다른 것이다. 각자 지역에서만 사용하는 이름일 뿐이다. 만약 다른 프로시저 바깥에서 내부에 인자 이름을 사용하게 된다면 good_enough()에서 x인지 square()에서 x인지 뒤죽박죽 섞이게 될 것이다. square()는 블랙박스여야 한다. 
 
+이렇게 프로시저에 매개변수 인자 이름이 얽매인다bind는 뜻에서 매인 변수bound variable라고 한다. 프로시저 선언 내부에서 인자 이름을 접근할 수 있는 표현식들을 유효 범위scope라고 한다. 위에서 guess와 x는 good_enough에 매인 변수지만, abs(), square()는 프로시저 선언에 얽매이지 않은 자유 범위를 가진다. 만약 guess를 abs로 바꾸면 매인 변수 abs가 자유 범위 abs 대신 덮어서 사용하게 된다. 하지만 good_enough()는 이미 바깥쪽에서 정의한 이름 abs를 쓰고 있기 때문에 자유 변수에서 벗어나는 것은 아니다. 
 
+###### 안쪽 정의와 블록 구조
 
-## <a name="head1.2"></a> 1.2 Procedures and the Processes They Generate
+앞서 설명한 것은 인자 이름이 프로시저에 얽매인 것을 설명하면서 이름 가둬놓기name isolation을 설명했다. 
+
+sqrt() 내부를 여러 프로시저로 나눠서 선언했지만 사용할 때는 sqrt()만 있으면 된다. 다른 프로시저들은 헷갈리게 만들고, 다른 프로세저에서 같은 이름을 사용하려면 이미 sqrt()에서 선언했기 때문에 안된다. 여러 사람들이 큰 시스템을 함께 만들 때는 이렇게 프로시저 이름이 충돌하는 문제가 생길 수 있다. 이럴 경우에 sqrt()와 함께 관련이 있는 프로시저 good_enough나 improve 같은 이름을 한 프로시저 내부에 가둘 수도 있다. 이렇게 구현해서 다시 작성하면 다음과 같다. 
+
+```swift
+func sqrt(x: Double) -> Double {    
+    func improve(_ guess: Double, _ x: Double) -> Double {
+        return average(guess, x / guess)
+    }
+        
+    func good_enough(_ guess: Double, _ x: Double) -> Bool {
+        return abs(square(guess) - x) < 0.0001
+    }
+        
+    func sqrt_iter(_ guess: Double, _ x: Double) -> Double {
+        if good_enough(guess, x) {
+            return guess
+        }
+        else {
+            return sqrt_iter(improve(guess, x), x)
+        }
+    }
+    return sqrt_iter(1, x)
+}
+```
+
+이렇게 프로시저 정의를 겹쳐 쓰는 방식을 불록 구조block structure라 한다. 이렇게 프로시저를 안쪽에 감추기 때문에 프로시저 정의를 짧게 줄일 수 있다. 우선 x가 sqrt에 매개 변수로 넘어온 얽매인 변수라서 다른 프로시저 선언마다 x를 넣지 않고 자유 변수로 만들어도 된다. 
+
+```swift
+func sqrt(x: Double) -> Double {
+    func improve(_ guess: Double) -> Double {
+        return average(guess, x / guess)
+    }
+    
+    func good_enough(_ guess: Double) -> Bool {
+        return abs(square(guess) - x) < 0.0001
+    }
+        
+    func sqrt_iter(_ guess: Double) -> Double {
+        if good_enough(guess) {
+            return guess
+        }
+        else {
+            return sqrt_iter(improve(guess))
+        }
+    }
+    return sqrt_iter(1.0)
+}
+```
+
+이제부터는 큰 프로그램을 여러 조각으로 나누고 쉽게 선언하기 위해서 블록 구조를 자주 활용한다. 
+
+## <a name="head1.2"></a> 1.2 프로시저와 프로세스 Procedures and the Processes They Generate
 
 
 
