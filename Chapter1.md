@@ -56,7 +56,7 @@ The importance of this is that there are powerful program-design techniques that
 
 [1.2 Procedures and the Processes They Generate](https://github.com/godrm/SICP-Swift/blob/master/1.2.md)
 
-[1.3 Formulating Abstractions](https://github.com/godrm/SICP-Swift/blob/master/1.3.md)
+[1.3 Formulating Abstractions with Higher-Order procedure](https://github.com/godrm/SICP-Swift/blob/master/1.3.md)
 
 
 
