@@ -11,7 +11,7 @@ Structure and Interpretation of Computer Programs
 이 책은 5부로 나눠져있다. 
 1. [프로시저로 요약하는 방식](https://github.com/godrm/SICP-Swift/blob/master/Chapter1.md) (Building Abstractions with Procedures)
 
-2. 데이터를 요약하는 방식 (Building Abstractions with Data)
+2. [데이터를 요약하는 방식](https://github.com/godrm/SICP-Swift/blob/master/Chapter2.md) (Building Abstractions with Data)
 
 3. 모듈과 물체, 상태 (Modularity, Objects, and State)
 
